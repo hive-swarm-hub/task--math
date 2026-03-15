@@ -1,3 +1,5 @@
 data/
 run.log
 .hive/
+results.tsv
+run.log
