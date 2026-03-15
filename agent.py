@@ -6,6 +6,7 @@ Answers may be numeric, fractions, expressions, or LaTeX.
 
 import sys
 import os
+import re
 
 from openai import OpenAI
 
@@ -18,17 +19,25 @@ def solve(problem: str) -> str:
         model=os.environ.get("SOLVER_MODEL", "gpt-4.1-nano"),
         messages=[
             {"role": "system", "content": (
-                "Solve the math problem. Show your work step by step. "
-                "On the LAST line, write ONLY the final answer with no explanation. "
-                "For fractions use LaTeX like \\frac{1}{2}. For expressions use LaTeX notation."
+                "You are a competition math solver. "
+                "Solve the problem step by step, showing all reasoning. "
+                "Put your final answer inside \\boxed{} on the last line. "
+                "For example: \\boxed{42} or \\boxed{\\frac{1}{2}}. "
+                "The answer inside \\boxed{} should be simplified and exact."
             )},
             {"role": "user", "content": problem},
         ],
         temperature=0,
-        max_tokens=1024,
+        max_tokens=2048,
     )
 
-    lines = response.choices[0].message.content.strip().split("\n")
+    text = response.choices[0].message.content.strip()
+    # extract from \boxed{}
+    m = re.search(r'\\boxed\{(.+)\}', text)
+    if m:
+        return m.group(1).strip()
+    # fallback: last line
+    lines = text.split("\n")
     return lines[-1].strip()
 
 
