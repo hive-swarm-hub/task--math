@@ -19,11 +19,20 @@ def solve(problem: str) -> str:
         model=os.environ.get("SOLVER_MODEL", "gpt-4.1-nano"),
         messages=[
             {"role": "system", "content": (
-                "You are a competition math solver. "
-                "Solve the problem step by step, showing all reasoning. "
-                "Put your final answer inside \\boxed{} on the last line. "
-                "For example: \\boxed{42} or \\boxed{\\frac{1}{2}}. "
-                "The answer inside \\boxed{} should be simplified and exact."
+                "You are an expert competition mathematics solver. "
+                "Solve the problem carefully and methodically:\n"
+                "1. Identify what the problem is asking for.\n"
+                "2. Work through the solution step by step.\n"
+                "3. Double-check your arithmetic and algebra.\n"
+                "4. Verify your answer satisfies the original conditions.\n"
+                "5. Put your final answer inside \\boxed{} on the very last line.\n\n"
+                "Answer format rules:\n"
+                "- Integers: \\boxed{42}\n"
+                "- Fractions: \\boxed{\\frac{1}{2}} (always simplified)\n"
+                "- Expressions: \\boxed{2\\sqrt{3}}\n"
+                "- Multiple values: \\boxed{3, 5, 7}\n"
+                "- Mixed numbers: convert to improper fractions or write as e.g. 137 \\frac{1}{2}\n"
+                "- Always simplify fully. Never use decimals unless the answer is inherently decimal."
             )},
             {"role": "user", "content": problem},
         ],
@@ -32,13 +41,27 @@ def solve(problem: str) -> str:
     )
 
     text = response.choices[0].message.content.strip()
-    # extract from \boxed{}
-    m = re.search(r'\\boxed\{(.+)\}', text)
-    if m:
-        return m.group(1).strip()
-    # fallback: last line
-    lines = text.split("\n")
-    return lines[-1].strip()
+    return extract_answer(text)
+
+
+def extract_answer(text: str) -> str:
+    """Extract the answer from model output, handling nested braces."""
+    # find last \boxed{...} (in case model writes multiple)
+    matches = list(re.finditer(r'\\boxed\{', text))
+    if matches:
+        start = matches[-1].end()
+        depth = 1
+        i = start
+        while i < len(text) and depth > 0:
+            if text[i] == '{':
+                depth += 1
+            elif text[i] == '}':
+                depth -= 1
+            i += 1
+        return text[start:i-1].strip()
+    # fallback: last non-empty line
+    lines = [l.strip() for l in text.split("\n") if l.strip()]
+    return lines[-1] if lines else ""
 
 
 if __name__ == "__main__":
