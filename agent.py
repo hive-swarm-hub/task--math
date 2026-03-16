@@ -37,7 +37,7 @@ def solve(problem: str) -> str:
             {"role": "user", "content": problem},
         ],
         temperature=0,
-        max_tokens=4096,
+        max_tokens=8192,
     )
 
     text = response.choices[0].message.content.strip()
