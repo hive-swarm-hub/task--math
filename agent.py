@@ -32,7 +32,10 @@ def solve(problem: str) -> str:
                 "- Expressions: \\boxed{2\\sqrt{3}}\n"
                 "- Multiple values: \\boxed{3, 5, 7}\n"
                 "- Mixed numbers: convert to improper fractions or write as e.g. 137 \\frac{1}{2}\n"
-                "- Always simplify fully. Never use decimals unless the answer is inherently decimal."
+                "- Always simplify fully. Never use decimals unless the answer is inherently decimal.\n\n"
+                "IMPORTANT: Give ONLY the value asked for inside \\boxed{}. "
+                "Do not include variable names, units, or labels. "
+                "For example, if asked 'What is tan A?', answer \\boxed{2}, not \\boxed{\\tan A = 2}."
             )},
             {"role": "user", "content": problem},
         ],
