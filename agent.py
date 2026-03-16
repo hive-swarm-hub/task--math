@@ -49,16 +49,26 @@ def clean_answer(answer: str) -> str:
     s = answer.strip()
     # remove wrapping dollar signs
     s = s.strip('$')
-    # remove prefixes like "(a, b, c, d) = "
+    # remove prefixes like "(a, b, c, d) = " or "\tan A = "
+    s = re.sub(r'^\\?[a-zA-Z]+\s*[A-Za-z]?\s*=\s*', '', s)
     s = re.sub(r'^[\(\[]?[a-zA-Z](?:\s*,\s*[a-zA-Z])*[\)\]]?\s*=\s*', '', s)
     # remove \! (thin space) from numbers
     s = s.replace('\\!', '')
     # remove \text{} wrapper but keep content
     s = re.sub(r'\\text\{([^}]*)\}', r'\1', s)
+    # remove \left and \right
+    s = s.replace('\\left', '').replace('\\right', '')
     # remove spaces around commas in tuples
     s = re.sub(r'\s*,\s*', ',', s)
-    # remove spaces around operators in simple expressions (but keep "137 \frac")
-    # Don't touch spaces around \frac or \sqrt etc
+    # collapse spaces around +/- in expressions (6 + 9i -> 6+9i)
+    # but NOT before \frac, \sqrt, \pi etc (keep "137 \frac{1}{2}")
+    s = re.sub(r'\s*\+\s*', '+', s)
+    s = re.sub(r'\s*-\s*', '-', s)
+    # restore space before backslash commands (e.g. "137\frac" -> "137 \frac")
+    s = re.sub(r'(\d)\\', r'\1 \\', s)
+    # also handle "-\frac" -> "-\\frac" (no space needed, just minus)
+    # normalize spaces
+    s = s.strip()
     return s
 
 
