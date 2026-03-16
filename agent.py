@@ -41,7 +41,25 @@ def solve(problem: str) -> str:
     )
 
     text = response.choices[0].message.content.strip()
-    return extract_answer(text)
+    return clean_answer(extract_answer(text))
+
+
+def clean_answer(answer: str) -> str:
+    """Post-process extracted answer to match judge's expected format."""
+    s = answer.strip()
+    # remove wrapping dollar signs
+    s = s.strip('$')
+    # remove prefixes like "(a, b, c, d) = "
+    s = re.sub(r'^[\(\[]?[a-zA-Z](?:\s*,\s*[a-zA-Z])*[\)\]]?\s*=\s*', '', s)
+    # remove \! (thin space) from numbers
+    s = s.replace('\\!', '')
+    # remove \text{} wrapper but keep content
+    s = re.sub(r'\\text\{([^}]*)\}', r'\1', s)
+    # remove spaces around commas in tuples
+    s = re.sub(r'\s*,\s*', ',', s)
+    # remove spaces around operators in simple expressions (but keep "137 \frac")
+    # Don't touch spaces around \frac or \sqrt etc
+    return s
 
 
 def extract_answer(text: str) -> str:
