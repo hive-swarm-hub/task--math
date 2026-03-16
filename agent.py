@@ -11,6 +11,15 @@ import re
 from openai import OpenAI
 
 
+def preprocess(problem: str) -> str:
+    """Clean up problem text for better model understanding."""
+    # Strip [asy]...[/asy] blocks — they're Asymptote diagram code
+    # that the model can't render. The labels in them are still
+    # referenced in the problem text.
+    cleaned = re.sub(r'\[asy\].*?\[/asy\]', '[Diagram]', problem, flags=re.DOTALL)
+    return cleaned.strip()
+
+
 def solve(problem: str) -> str:
     """Solve a competition math problem. Return the answer as a string."""
     client = OpenAI()
@@ -37,7 +46,7 @@ def solve(problem: str) -> str:
                 "Do not include variable names, units, or labels. "
                 "For example, if asked 'What is tan A?', answer \\boxed{2}, not \\boxed{\\tan A = 2}."
             )},
-            {"role": "user", "content": problem},
+            {"role": "user", "content": preprocess(problem)},
         ],
         temperature=0,
         max_tokens=8192,
