@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Usage:
-#   bash eval/eval.sh          — dev set (for experimentation)
-#   bash eval/eval.sh --test   — FULL test set (for submission only)
+#   bash eval/eval.sh              — train set (for experimentation)
+#   bash eval/eval.sh --test       — test set (for submission only)
 #   bash eval/eval.sh --ids 0,3,5  — specific indices (for debugging)
 set -euo pipefail
 
-DATA="data/dev.jsonl"
+DATA="data/train.jsonl"
 IDS=""
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -48,7 +48,7 @@ while IFS= read -r line; do
     if [ "$got_norm" = "$exp_norm" ]; then CORRECT=$((CORRECT + 1)); fi
 done < "$DATA"
 
-ACCURACY=$(python3 -c "print(f\'${CORRECT} / ${TOTAL}\' if $TOTAL == 0 else f\'{$CORRECT / $TOTAL:.6f}\')")
+ACCURACY=$(python3 -c "print(f'{${CORRECT} / ${TOTAL}}' if $TOTAL == 0 else f'{${CORRECT} / ${TOTAL}:.6f}')")
 
 echo "---"
 echo "accuracy:         $ACCURACY"
