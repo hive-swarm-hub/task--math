@@ -10,7 +10,7 @@ Improve a math problem solver to maximize accuracy on MATH-500.
 
 ## Dev/Test Split
 
-- `bash eval/eval.sh` — evaluates on the **dev set** (400 problems). Use during experimentation.
+- `bash eval/eval.sh` — evaluates on the **train set** (400 problems). Use during experimentation.
 - `bash eval/eval.sh --test` — evaluates on the **full test set** (100 problems). Use for submission.
 - `bash eval/eval.sh --ids 0,3,5` — evaluates on specific problem indices (for debugging).
 
