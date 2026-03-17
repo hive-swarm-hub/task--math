@@ -1,28 +1,26 @@
 #!/usr/bin/env bash
-# Download MATH-500 test set. Run once.
 set -euo pipefail
-
 mkdir -p data
-
-echo "Downloading MATH-500 test set..."
+echo "Downloading MATH-500..."
 python3 -c "
 from datasets import load_dataset
-import json, pathlib, random
+import json, pathlib
 
-random.seed(42)
 ds = load_dataset('HuggingFaceH4/MATH-500', split='test')
-ds = ds.shuffle(seed=42).select(range(50))
-out = pathlib.Path('data/test.jsonl')
-with out.open('w') as f:
-    for row in ds:
-        f.write(json.dumps({
-            'problem': row['problem'],
-            'answer': row['answer'],
-            'subject': row['subject'],
-            'level': row['level'],
-        }) + '\n')
+ds = ds.shuffle(seed=42)
 
-print(f'Wrote {len(ds)} problems to {out}')
+dev_out = pathlib.Path('data/dev.jsonl')
+test_out = pathlib.Path('data/test.jsonl')
+
+with dev_out.open('w') as f:
+    for row in list(ds)[:400]:
+        f.write(json.dumps({'question': row['problem'], 'answer': row['answer']}) + '\n')
+
+with test_out.open('w') as f:
+    for row in list(ds)[400:]:
+        f.write(json.dumps({'question': row['problem'], 'answer': row['answer']}) + '\n')
+
+print(f'Dev:  400 problems -> {dev_out}')
+print(f'Test: 100 problems -> {test_out}')
 "
-
-echo "Done. $(wc -l < data/test.jsonl) problems in data/test.jsonl"
+echo "Done."
